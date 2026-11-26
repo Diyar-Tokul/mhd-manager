@@ -1,11 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import AuthGuard from "@/components/AuthGuard";
-import ProductForm, { FormData } from "@/components/ProductForm";
-import { supabase } from "@/lib/supabase";
-import { Product } from "@/lib/types";
-import { getAmpel, daysText } from "@/lib/mhd";
+import AuthGuard, { useUser } from "@/components/AuthGuard";
+import ProductForm from "@/components/ProductForm";
+import AmpelBadge from "@/components/AmpelBadge";
+import StatusBadge from "@/components/StatusBadge";
+import { deleteProduct, getProduct, updateProduct } from "@/lib/api";
+import { Product, ProductInput, Status } from "@/lib/types";
+import { daysUntil, discountSuggestion } from "@/lib/mhd";
 
 export default function EditProductPage() {
   return <AuthGuard><EditProduct /></AuthGuard>;
@@ -14,52 +17,66 @@ export default function EditProductPage() {
 function EditProduct() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [product, setProduct] = useState<Product | null>(null);
+  const user = useUser();
+  const [product, setProduct] = useState<Product | null | undefined>(undefined);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    supabase.from("products").select("*").eq("id", id).single().then(({ data }) => setProduct(data));
+    getProduct(id).then(setProduct).catch((e: Error) => setError(e.message));
   }, [id]);
 
-  async function save(data: FormData) {
-    const { error } = await supabase.from("products")
-      .update({ ...data, article_number: data.article_number || null })
-      .eq("id", id);
-    if (error) alert("Fehler beim Speichern: " + error.message);
-    else router.push("/products");
-  }
-
-  async function setStatus(status: string) {
-    await supabase.from("products").update({ status }).eq("id", id);
+  async function save(data: ProductInput) {
+    await updateProduct(id, data); // Fehler zeigt das Formular an
     router.push("/products");
   }
 
-  async function remove() {
-    if (!confirm("Produkt wirklich löschen?")) return;
-    const { error, count } = await supabase.from("products").delete({ count: "exact" }).eq("id", id);
-    if (error || count === 0) alert("Löschen nicht möglich. Nur Administratoren dürfen Produkte löschen.");
-    else router.push("/products");
+  async function setStatus(status: Status) {
+    try {
+      await updateProduct(id, { status });
+      router.push("/products");
+    } catch (e) {
+      setError((e as Error).message);
+    }
   }
 
-  if (!product) return <p>Lade...</p>;
-  const a = getAmpel(product.expiry_date);
+  async function remove() {
+    if (!product || !confirm(`„${product.name}“ wirklich löschen?`)) return;
+    try {
+      await deleteProduct(id, user);
+      router.push("/products");
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  if (product === undefined && !error) return <p>Lade...</p>;
+  if (product === null) return <p className="box">Produkt nicht gefunden. <Link href="/products">Zur Übersicht</Link></p>;
+  if (!product) return <p className="error box">{error}</p>;
+
+  const v = discountSuggestion(daysUntil(product.expiry_date));
 
   return (
     <>
+      <p><Link href="/products">← Zurück zur Übersicht</Link></p>
       <h1>{product.name} bearbeiten</h1>
-      <p><span className={`ampel ${a.color}`}>{a.label}</span> {daysText(a.days)}</p>
+      <p>
+        <AmpelBadge expiry={product.expiry_date} /> · Status: <StatusBadge status={product.status} />
+        {v && <> · Vorschlag: <strong>{v.text}</strong></>}
+      </p>
 
       <div className="box">
         <strong>Schnellaktionen</strong>
         <div className="row">
-          <button onClick={() => setStatus("reduziert")}>Als reduziert markieren</button>
+          <button onClick={() => setStatus("reduziert")} disabled={product.status === "reduziert"}>Als reduziert markieren</button>
           <button className="grey" onClick={() => setStatus("verkauft")}>Verkauft</button>
           <button className="grey" onClick={() => setStatus("entsorgt")}>Entsorgt</button>
-          <button className="danger" onClick={remove}>Löschen</button>
+          {user.role === "admin" && <button className="danger" onClick={remove}>Löschen</button>}
         </div>
+        {user.role !== "admin" && <p className="hint">Löschen ist nur für Administratoren möglich.</p>}
+        {error && <p className="error">{error}</p>}
       </div>
 
       <ProductForm
-        showStatus
         buttonText="Änderungen speichern"
         onSubmit={save}
         initial={{
@@ -67,10 +84,11 @@ function EditProduct() {
           category: product.category,
           quantity: product.quantity,
           expiry_date: product.expiry_date,
-          article_number: product.article_number || "",
+          article_number: product.article_number,
           status: product.status,
         }}
       />
+      <p className="hint">Zuletzt geändert: {new Date(product.updated_at).toLocaleString("de-DE")}</p>
     </>
   );
 }

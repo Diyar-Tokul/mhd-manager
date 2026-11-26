@@ -19,6 +19,10 @@ create table products (
   updated_at timestamptz not null default now()
 );
 
+-- Schnellere Sortierung/Filterung nach MHD und Status
+create index products_expiry_idx on products (expiry_date);
+create index products_status_idx on products (status);
+
 -- updated_at automatisch setzen
 create function set_updated_at() returns trigger as $$
 begin
