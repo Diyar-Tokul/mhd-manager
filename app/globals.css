@@ -1,0 +1,56 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f2f4f3;
+  color: #222;
+}
+a { color: #1f6f43; }
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+
+nav { background: #1f6f43; color: white; }
+nav .inner { max-width: 1000px; margin: 0 auto; padding: 12px 20px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+nav a { color: white; text-decoration: none; font-weight: bold; }
+nav .brand { font-size: 18px; margin-right: auto; }
+nav button { background: white; color: #1f6f43; }
+
+h1 { font-size: 24px; }
+.box { background: white; border: 1px solid #ddd; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat { background: white; border: 1px solid #ddd; border-left: 6px solid #1f6f43; border-radius: 6px; padding: 12px; }
+.stat .num { font-size: 28px; font-weight: bold; }
+.stat.warn { border-left-color: #e67e22; }
+.stat.bad { border-left-color: #c0392b; }
+.stat.info { border-left-color: #2980b9; }
+
+button, .btn {
+  background: #1f6f43; color: white; border: none; border-radius: 4px;
+  padding: 8px 14px; font-size: 14px; cursor: pointer; text-decoration: none; display: inline-block;
+}
+button:hover, .btn:hover { opacity: 0.9; }
+button.danger { background: #c0392b; }
+button.grey { background: #777; }
+
+label { display: block; font-weight: bold; margin: 10px 0 4px; }
+input, select { width: 100%; padding: 8px; border: 1px solid #bbb; border-radius: 4px; font-size: 14px; }
+
+table { width: 100%; border-collapse: collapse; background: white; }
+th, td { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; }
+th { background: #e8efe9; }
+.table-wrap { overflow-x: auto; border: 1px solid #ddd; border-radius: 6px; }
+
+.ampel { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; white-space: nowrap; }
+.ampel.green { background: #d4edda; color: #155724; }
+.ampel.yellow { background: #fff3cd; color: #856404; }
+.ampel.orange { background: #ffe0c2; color: #8a4300; }
+.ampel.red { background: #f8d7da; color: #721c24; }
+.ampel.black { background: #333; color: white; }
+
+.filters { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.filters input, .filters select { width: auto; flex: 1; min-width: 150px; }
+
+.error { color: #c0392b; margin-top: 10px; }
+.success { color: #1f6f43; margin-top: 10px; }
+.login { max-width: 360px; margin: 80px auto; }
+.row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
