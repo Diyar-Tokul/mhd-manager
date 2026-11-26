@@ -101,6 +101,9 @@ docs/               Projektdokumentation und Berichte
 ```
 
 ## Team
-- Projektleitung / Datenbank / Auth / Deployment: ___
-- Frontend (Seiten, Design, Navigation): ___
-- Logik & Tests (Ampel, Filter, Validierung, Doku): ___
+Diyar, Filip, Iwan, Yündem
+
+Aufgabenbereiche:
+- Projektleitung / Datenbank / Auth / Deployment
+- Frontend (Seiten, Design, Navigation)
+- Logik & Tests (Ampel, Filter, Validierung, Doku)
